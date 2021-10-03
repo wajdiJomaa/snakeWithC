@@ -1,6 +1,9 @@
-#include <ncurses.h>
+#include <conio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
+
+
 
 // defining a linked list to store the snake
 typedef struct coords
@@ -22,6 +25,9 @@ typedef struct snake
 } snake;
 // end of definition , the linked list is called snake
 
+//prototypes
+void free_snake(snake *karl);
+int head_in_snake(coords start,snake* karl);
 //add an element to the head of the snake
 void push(snake *karl, coords point)
 {
@@ -108,7 +114,7 @@ int main()
     int x = 1;
     int y = 0;
     int eat = 0;
-
+    char state = 'r';
     //the game loop
     while (1)
     {
@@ -116,6 +122,10 @@ int main()
         draw(*karl, apple);
         //checking losing
         if (start.x == 60 || start.x == 0 || start.y == 0 || start.y == 30)
+        {
+            break;
+        }
+        if(head_in_snake(start,karl))
         {
             break;
         }
@@ -131,31 +141,34 @@ int main()
             eat = 0;
         }
         //getting input
-        initscr();
-        timeout(400);
-        move = getch();
-        flushinp();
-        endwin();
+        if(kbhit())
+        {
+            move = getch();
+        }
         
-        if (move == 'w')
+        if (move == 'w' && state !='b')
         {
             y = -1;
             x = 0;
+            state = 't';
         }
-        else if (move == 's')
+        else if (move == 's' && state !='t')
         {
             x = 0;
             y = 1;
+            state='b';
         }
-        else if (move == 'a')
+        else if (move == 'a' && state !='r')
         {
             x = -1;
             y = 0;
+            state='l';
         }
-        else if (move == 'd')
+        else if (move == 'd' && state !='l')
         {
             x = 1;
             y = 0;
+            state='r';
         }
         start.x += x;
         start.y += y;
@@ -164,8 +177,37 @@ int main()
         {
             pop(karl);
         }
-        system("clear");
+        Sleep(100);
+       system("cls");
     }
-
+    free_snake(karl);
     return 0;
 }
+
+
+void free_snake(snake *karl)
+{
+
+    particle *tmp = karl->head;
+    particle* next;
+    while(tmp!=NULL)
+    {
+        next = tmp->next;
+        free(tmp);
+        tmp = next;
+    }
+}
+int head_in_snake(coords start,snake* karl)
+{
+    particle* tmp = karl->head->next;
+    while (tmp!=NULL)
+    {
+        if(tmp->co.x == start.x && tmp->co.y == start.y)
+        {
+            return 1;
+        }
+        tmp=tmp->next;
+    }
+    return 0;
+}
+
